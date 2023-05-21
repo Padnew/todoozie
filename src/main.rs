@@ -72,10 +72,10 @@ fn view_remaining_todos(incomplete_todos: &mut Vec<Todo>) {
 }
 
 fn clear_todos(incomplete_todos: &mut Vec<Todo>) {
+    clear_terminal();
     println!("Are you sure you wish to clear all current todos? (Type 'yes' to confirm)");
     let double_check = &get_string_input() as &str;
-    println!("{}", double_check);
-    match double_check {
+    match double_check.trim() {
         "yes" => {
             incomplete_todos.clear();
             println!("Todos cleared, returning to menu...");
