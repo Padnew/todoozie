@@ -1,6 +1,6 @@
 #![allow(unused_variables, dead_code)]
-use todoozie;
 use todoozie::Todo;
+use todoozie::{self, timeout1s};
 
 fn main() {
     let mut incomplete_todos: Vec<Todo> = Vec::<Todo>::new();
@@ -21,7 +21,11 @@ fn main() {
             2 => todoozie::view_remaining_todos(&mut incomplete_todos),
             3 => todoozie::clear_todos(&mut incomplete_todos),
             4 => std::process::exit(1),
-            _ => continue,
+            _ => {
+                println!("Invalid input");
+                timeout1s();
+                continue;
+            }
         };
     }
 }
