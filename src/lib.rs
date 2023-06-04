@@ -1,22 +1,42 @@
 #![allow(unused_must_use)]
 use core::panic;
 // use std::fs;
-use std::io;
+use std::{fmt, io};
 use std::{thread, time};
 
-#[derive(Debug)]
+use colored::Colorize;
+
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TodoStatus {
     Incomplete,
     Complete,
 }
-#[derive(Debug)]
+impl fmt::Display for TodoStatus {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            TodoStatus::Incomplete => write!(f, "Incomplete"),
+            TodoStatus::Complete => write!(f, "Complete"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TodoUrgency {
     Urgent,
     Passive,
     Reminder,
 }
+impl fmt::Display for TodoUrgency {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            TodoUrgency::Passive => write!(f, "Passive"),
+            TodoUrgency::Reminder => write!(f, "Reminder"),
+            TodoUrgency::Urgent => write!(f, "Urgent"),
+        }
+    }
+}
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Todo {
     pub todo_status: TodoStatus,
     pub todo_task_name: String,
@@ -28,7 +48,7 @@ impl Todo {
         let split: std::str::Split<&str> = task_details.split(" ");
         let collection: Vec<&str> = split.collect();
         if collection.len() < 2 {
-            println!("Invalid number of arguments, try again...");
+            println!("{}", "Invalid number of arguments, try again...".red());
             timeout1s();
             create_new_todo(incomplete_todos);
         } else {
@@ -68,7 +88,7 @@ impl Todo {
                 todo_urgency: (TodoUrgency::Reminder),
             })),
             _ => Err({
-                println!("Invalid task severity, try again...");
+                println!("{}", "Invalid task severity, try again...".red());
                 timeout1s();
                 create_new_todo(incomplete_todos);
             }),
@@ -78,9 +98,14 @@ impl Todo {
 
 pub fn create_new_todo(incomplete_todos: &mut Vec<Todo>) {
     clear_terminal();
-    println!("Add new Todo");
-    println!("_____________________");
-    println!("Task and severity (1. Severe, 2. Passive, 3. Reminder): ");
+    println!("{}", "Add new Todo".bright_magenta());
+    println!("_________________________________________________________");
+    println!(
+        "Task and severity (1. {}, 2. {}, 3. {}): ",
+        "Urgent".red(),
+        "Passive".green(),
+        "Reminder".yellow()
+    );
     Todo::build(get_string_input(), incomplete_todos);
     println!("Todo created, returning to menu...");
     timeout1s()
@@ -88,20 +113,30 @@ pub fn create_new_todo(incomplete_todos: &mut Vec<Todo>) {
 
 pub fn view_remaining_todos(incomplete_todos: &mut Vec<Todo>) {
     clear_terminal();
-    println!("Current Todos:");
+    println!("{}", "Current Todos:".bright_magenta());
+    println!("_________________________________________________________");
     for todo in incomplete_todos {
         println!(
-            "TODO: {} | Status: {:?} | Urgency: {:?}",
-            todo.todo_task_name, todo.todo_status, todo.todo_urgency
+            "TODO: {} | Status: {} | Urgency: {}",
+            todo.todo_task_name.blue(),
+            todo.todo_status.to_string().red(),
+            match todo.todo_urgency {
+                TodoUrgency::Passive => todo.todo_urgency.to_string().green(),
+                TodoUrgency::Reminder => todo.todo_urgency.to_string().yellow(),
+                TodoUrgency::Urgent => todo.todo_urgency.to_string().red(),
+            }
         )
     }
-    println!("Press enter to return to the menu");
+    println!("{}", "Press enter to return to the menu".red());
     get_string_input();
 }
 
 pub fn clear_todos(incomplete_todos: &mut Vec<Todo>) {
     clear_terminal();
-    println!("Are you sure you wish to clear all current todos? (Type 'yes' to confirm)");
+    println!(
+        "{}",
+        "Are you sure you wish to clear all current todos? (Type 'yes' to confirm)".red()
+    );
     let double_check = &get_string_input() as &str;
     match double_check.trim() {
         "yes" => {
@@ -110,7 +145,7 @@ pub fn clear_todos(incomplete_todos: &mut Vec<Todo>) {
             timeout1s()
         }
         _ => {
-            println!("Todos NOT cleared, returning to menu...");
+            println!("{}", "Todos NOT cleared, returning to menu...".red());
             timeout1s()
         }
     }
