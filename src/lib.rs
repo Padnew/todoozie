@@ -1,10 +1,7 @@
 #![allow(unused_must_use)]
-use core::panic;
-// use std::fs;
+use colored::Colorize;
 use std::{fmt, io};
 use std::{thread, time};
-
-use colored::Colorize;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TodoStatus {
@@ -111,7 +108,7 @@ pub fn create_new_todo(incomplete_todos: &mut Vec<Todo>) {
     timeout1s()
 }
 
-pub fn view_remaining_todos(incomplete_todos: &mut Vec<Todo>) {
+pub fn view_all_todos(incomplete_todos: &mut Vec<Todo>) {
     clear_terminal();
     println!("{}", "Current Todos:".bright_magenta());
     println!("_________________________________________________________");
@@ -137,7 +134,7 @@ pub fn clear_todos(incomplete_todos: &mut Vec<Todo>) {
         "{}",
         "Are you sure you wish to clear all current todos? (Type 'yes' to confirm)".red()
     );
-    let double_check = &get_string_input() as &str;
+    let double_check = get_string_input();
     match double_check.trim() {
         "yes" => {
             incomplete_todos.clear();
@@ -150,23 +147,22 @@ pub fn clear_todos(incomplete_todos: &mut Vec<Todo>) {
         }
     }
 }
-pub fn get_int_input() -> i32 {
-    let mut user_input = String::new();
-    io::stdin()
-        .read_line(&mut user_input)
-        .expect("Unable to read input");
-    let user_input: i32 = match user_input.trim().parse() {
-        Ok(num) => num,
-        Err(_) => panic!("Error: User exited program or invalid input"),
-    };
-    return user_input;
-}
+// TODO: Try to replace this with text_IO crate
+// pub fn get_int_input() -> i32 {
+//     let mut user_input = String::new();
+//     io::stdin().read_line(&mut user_input);
+//     let user_input: i32 = match user_input.trim().parse() {
+//         Ok(num) => num,
+//         Err(_) => panic!("Invalid input"),
+//     };
+//     return user_input;
+// }
 
 pub fn get_string_input() -> String {
     let mut user_input = String::new();
     io::stdin()
         .read_line(&mut user_input)
-        .expect("Unable to read input");
+        .expect("Unable to read input somehow even though String input is really robust");
     return user_input;
 }
 
