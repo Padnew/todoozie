@@ -24,11 +24,16 @@ fn main() {
         println!(
             "{} {}",
             "3. ".bright_magenta(),
-            "Clear all Todos".bright_green()
+            "Complete a Todo".bright_green()
         );
         println!(
             "{} {}",
             "4. ".bright_magenta(),
+            "Clear all Todos".bright_green()
+        );
+        println!(
+            "{} {}",
+            "5. ".bright_magenta(),
             "Exit Todoozie".bright_green()
         );
         println!(
@@ -37,7 +42,7 @@ fn main() {
         );
         println!(
             "{}",
-            "Please enter your choice below: (1, 2, 3, 4)".bright_magenta()
+            "Please enter your choice below (1, 2, 3, 4, 5):".bright_magenta()
         );
 
         let menu_choice: i32 = read!();
@@ -45,8 +50,9 @@ fn main() {
         match menu_choice {
             1 => todoozie::create_new_todo(&mut incomplete_todos),
             2 => todoozie::view_all_todos(&mut incomplete_todos),
-            3 => todoozie::clear_todos(&mut incomplete_todos),
-            4 => std::process::exit(1),
+            3 => todoozie::complete_todo(&mut incomplete_todos),
+            4 => todoozie::clear_todos(&mut incomplete_todos),
+            5 => std::process::exit(1),
             _ => {
                 println!("Invalid input");
                 timeout1s();

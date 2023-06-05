@@ -2,6 +2,7 @@
 use colored::Colorize;
 use std::{fmt, io};
 use std::{thread, time};
+use text_io::read;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TodoStatus {
@@ -172,4 +173,29 @@ pub fn clear_terminal() {
 
 pub fn timeout1s() {
     thread::sleep(time::Duration::from_millis(1000));
+}
+
+pub fn complete_todo(todo_list: &mut Vec<Todo>) {
+    clear_terminal();
+    let mut index: i32 = 0;
+    println!("{}", "Which Todo have you completed:".bright_magenta());
+    for todo in todo_list {
+        if todo.todo_status == TodoStatus::Incomplete {
+            index += 1;
+            println!(
+                "{} {}",
+                { index.to_string() + "." }.bright_magenta(),
+                todo.todo_task_name.green()
+            );
+        }
+    }
+    println!(
+        "{}",
+        "____________________________________________".bright_magenta()
+    );
+    println!(
+        "{}",
+        "Please enter the number of the Todo you have completed:".red()
+    );
+    let todo_number: i32 = read!();
 }
