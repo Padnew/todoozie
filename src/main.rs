@@ -6,6 +6,7 @@ use todoozie::{self, timeout1s};
 fn main() {
     let mut incomplete_todos: Vec<Todo> = Vec::<Todo>::new();
     let menu_choice: i32;
+    todoozie::read_todos_from_file(&mut incomplete_todos);
     loop {
         todoozie::clear_terminal();
         println!("{}", "Todoozie v1.0".bright_magenta());

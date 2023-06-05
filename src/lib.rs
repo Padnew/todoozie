@@ -1,6 +1,8 @@
 #![allow(unused_must_use)]
 use colored::Colorize;
-use std::{fmt, io};
+use std::fmt;
+use std::fs::File;
+use std::io::{self, BufRead, BufReader};
 use std::{thread, time};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -200,4 +202,17 @@ pub fn view_remaining_todos(todo_list: &mut Vec<Todo>) {
         "{}",
         "Please enter the number of the Todo you have completed:".red()
     );
+}
+
+pub fn read_todos_from_file(mut todo_list: &mut Vec<Todo>) {
+    if let Ok(file) = File::open("data/todos.txt") {
+        let reader = BufReader::new(file);
+        for line in reader.lines() {
+            if let Ok(line) = line {
+                Todo::build(line, &mut todo_list);
+            } else {
+                println!("Failed to read line");
+            }
+        }
+    }
 }
