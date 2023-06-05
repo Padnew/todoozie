@@ -2,7 +2,6 @@
 use colored::Colorize;
 use std::{fmt, io};
 use std::{thread, time};
-use text_io::read;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TodoStatus {
@@ -148,16 +147,20 @@ pub fn clear_todos(incomplete_todos: &mut Vec<Todo>) {
         }
     }
 }
-// TODO: Try to replace this with text_IO crate
-// pub fn get_int_input() -> i32 {
-//     let mut user_input = String::new();
-//     io::stdin().read_line(&mut user_input);
-//     let user_input: i32 = match user_input.trim().parse() {
-//         Ok(num) => num,
-//         Err(_) => panic!("Invalid input"),
-//     };
-//     return user_input;
-// }
+
+pub fn get_int_input() -> i32 {
+    loop {
+        let mut user_input = String::new();
+        io::stdin().read_line(&mut user_input);
+        let _user_input: i32 = match user_input.trim().parse() {
+            Ok(num) => return num,
+            Err(_) => {
+                println!("{}", "Invalid input, please try again".red());
+                continue;
+            }
+        };
+    }
+}
 
 pub fn get_string_input() -> String {
     let mut user_input = String::new();
@@ -175,11 +178,11 @@ pub fn timeout1s() {
     thread::sleep(time::Duration::from_millis(1000));
 }
 
-pub fn complete_todo(todo_list: &mut Vec<Todo>) {
+pub fn view_remaining_todos(todo_list: &mut Vec<Todo>) {
     clear_terminal();
     let mut index: i32 = 0;
-    println!("{}", "Which Todo have you completed:".bright_magenta());
-    for todo in todo_list {
+    println!("{}", "Which todo have you completed?".bright_magenta());
+    for todo in &mut *todo_list {
         if todo.todo_status == TodoStatus::Incomplete {
             index += 1;
             println!(
@@ -197,5 +200,4 @@ pub fn complete_todo(todo_list: &mut Vec<Todo>) {
         "{}",
         "Please enter the number of the Todo you have completed:".red()
     );
-    let todo_number: i32 = read!();
 }

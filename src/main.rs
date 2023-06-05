@@ -1,14 +1,12 @@
 #![allow(unused_variables, dead_code)]
 
-use text_io::read;
-
 use colored::Colorize;
 use todoozie::Todo;
 use todoozie::{self, timeout1s};
 fn main() {
     let mut incomplete_todos: Vec<Todo> = Vec::<Todo>::new();
-    let menu_choice: i32 = 0;
-    while menu_choice != 4 {
+    let menu_choice: i32;
+    loop {
         todoozie::clear_terminal();
         println!("{}", "Todoozie v1.0".bright_magenta());
         println!(
@@ -45,12 +43,13 @@ fn main() {
             "Please enter your choice below (1, 2, 3, 4, 5):".bright_magenta()
         );
 
-        let menu_choice: i32 = read!();
+        // let menu_choice: i32 = read!();
+        let menu_choice = todoozie::get_int_input();
 
         match menu_choice {
             1 => todoozie::create_new_todo(&mut incomplete_todos),
             2 => todoozie::view_all_todos(&mut incomplete_todos),
-            3 => todoozie::complete_todo(&mut incomplete_todos),
+            3 => todoozie::view_remaining_todos(&mut incomplete_todos),
             4 => todoozie::clear_todos(&mut incomplete_todos),
             5 => std::process::exit(1),
             _ => {
