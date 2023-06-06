@@ -2,7 +2,7 @@
 use colored::Colorize;
 use std::fmt;
 use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io::{self, BufRead, BufReader, Write};
 use std::{thread, time};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -43,13 +43,13 @@ pub struct Todo {
 }
 
 impl Todo {
-    pub fn build(task_details: String, incomplete_todos: &mut Vec<Todo>) -> Result<(), ()> {
+    pub fn build(task_details: String, todo_list: &mut Vec<Todo>) -> Result<(), ()> {
         let split: std::str::Split<&str> = task_details.split(" ");
         let collection: Vec<&str> = split.collect();
         if collection.len() < 2 {
             println!("{}", "Invalid number of arguments, try again...".red());
             timeout1s();
-            create_new_todo(incomplete_todos);
+            create_new_todo(todo_list);
         } else {
         }
         // 'tn is the name of the block expression so it can break out easily
@@ -69,19 +69,18 @@ impl Todo {
             }
         };
         let task_urgency = collection[collection.len() - 1];
-        // println!("Task name: {}, Task severity: {}", task_name, task_urgency);
         match task_urgency.trim() {
-            "1" => Ok(incomplete_todos.push(Todo {
+            "1" | "Urgent" => Ok(todo_list.push(Todo {
                 todo_status: (TodoStatus::Incomplete),
                 todo_task_name: (task_name),
                 todo_urgency: (TodoUrgency::Urgent),
             })),
-            "2" => Ok(incomplete_todos.push(Todo {
+            "2" | "Passive" => Ok(todo_list.push(Todo {
                 todo_status: (TodoStatus::Incomplete),
                 todo_task_name: (task_name),
                 todo_urgency: (TodoUrgency::Passive),
             })),
-            "3" => Ok(incomplete_todos.push(Todo {
+            "3" | "Reminder" => Ok(todo_list.push(Todo {
                 todo_status: (TodoStatus::Incomplete),
                 todo_task_name: (task_name),
                 todo_urgency: (TodoUrgency::Reminder),
@@ -89,13 +88,13 @@ impl Todo {
             _ => Err({
                 println!("{}", "Invalid task severity, try again...".red());
                 timeout1s();
-                create_new_todo(incomplete_todos);
+                create_new_todo(todo_list);
             }),
         }
     }
 }
 
-pub fn create_new_todo(incomplete_todos: &mut Vec<Todo>) {
+pub fn create_new_todo(todo_list: &mut Vec<Todo>) {
     clear_terminal();
     println!("{}", "Add new Todo".bright_magenta());
     println!("_________________________________________________________");
@@ -105,16 +104,16 @@ pub fn create_new_todo(incomplete_todos: &mut Vec<Todo>) {
         "Passive".green(),
         "Reminder".yellow()
     );
-    Todo::build(get_string_input(), incomplete_todos);
+    Todo::build(get_string_input(), todo_list);
     println!("Todo created, returning to menu...");
     timeout1s()
 }
 
-pub fn view_all_todos(incomplete_todos: &mut Vec<Todo>) {
+pub fn view_all_todos(todo_list: &mut Vec<Todo>) {
     clear_terminal();
     println!("{}", "Current Todos:".bright_magenta());
     println!("_________________________________________________________");
-    for todo in incomplete_todos {
+    for todo in todo_list {
         println!(
             "TODO: {} | Status: {} | Urgency: {}",
             todo.todo_task_name.blue(),
@@ -130,7 +129,7 @@ pub fn view_all_todos(incomplete_todos: &mut Vec<Todo>) {
     get_string_input();
 }
 
-pub fn clear_todos(incomplete_todos: &mut Vec<Todo>) {
+pub fn clear_todos(todo_list: &mut Vec<Todo>) {
     clear_terminal();
     println!(
         "{}",
@@ -139,7 +138,7 @@ pub fn clear_todos(incomplete_todos: &mut Vec<Todo>) {
     let double_check = get_string_input();
     match double_check.trim() {
         "yes" => {
-            incomplete_todos.clear();
+            todo_list.clear();
             println!("Todos cleared, returning to menu...");
             timeout1s()
         }
@@ -180,6 +179,27 @@ pub fn timeout1s() {
     thread::sleep(time::Duration::from_millis(1000));
 }
 
+pub fn read_todos_from_file(mut todo_list: &mut Vec<Todo>) {
+    if let Ok(file) = File::open("data/todos.txt") {
+        let reader = BufReader::new(file);
+        for line in reader.lines() {
+            if let Ok(line) = line {
+                Todo::build(line, &mut todo_list);
+            } else {
+                println!("Failed to read line");
+            }
+        }
+    }
+}
+
+pub fn write_todos_to_file(todo_list: Vec<Todo>) {
+    let mut f = File::create("data/todos.txt").expect("Unable to find/create file");
+    for todo in &todo_list {
+        write!(f, "{} {}\n", todo.todo_task_name, todo.todo_urgency);
+    }
+}
+
+// TODO: Finish
 pub fn view_remaining_todos(todo_list: &mut Vec<Todo>) {
     clear_terminal();
     let mut index: i32 = 0;
@@ -202,17 +222,4 @@ pub fn view_remaining_todos(todo_list: &mut Vec<Todo>) {
         "{}",
         "Please enter the number of the Todo you have completed:".red()
     );
-}
-
-pub fn read_todos_from_file(mut todo_list: &mut Vec<Todo>) {
-    if let Ok(file) = File::open("data/todos.txt") {
-        let reader = BufReader::new(file);
-        for line in reader.lines() {
-            if let Ok(line) = line {
-                Todo::build(line, &mut todo_list);
-            } else {
-                println!("Failed to read line");
-            }
-        }
-    }
 }

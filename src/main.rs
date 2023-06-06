@@ -33,7 +33,7 @@ fn main() {
         println!(
             "{} {}",
             "5. ".bright_magenta(),
-            "Exit Todoozie".bright_green()
+            "Exit and save Todoozie".bright_green()
         );
         println!(
             "{}",
@@ -50,9 +50,13 @@ fn main() {
         match menu_choice {
             1 => todoozie::create_new_todo(&mut incomplete_todos),
             2 => todoozie::view_all_todos(&mut incomplete_todos),
+            // 3 is incomplete
             3 => todoozie::view_remaining_todos(&mut incomplete_todos),
             4 => todoozie::clear_todos(&mut incomplete_todos),
-            5 => std::process::exit(1),
+            5 => {
+                todoozie::write_todos_to_file(incomplete_todos);
+                std::process::exit(1)
+            }
             _ => {
                 println!("Invalid input");
                 timeout1s();
