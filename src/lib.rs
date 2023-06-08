@@ -109,42 +109,65 @@ pub fn create_new_todo(todo_list: &mut Vec<Todo>) {
     timeout1s()
 }
 
-pub fn view_all_todos(todo_list: &mut Vec<Todo>) {
+pub fn view_all_todos(todo_list: &Vec<Todo>) {
     clear_terminal();
-    println!("{}", "Current Todos:".bright_magenta());
-    println!("_________________________________________________________");
-    for todo in todo_list {
+    if todo_list.len() == 0 {
         println!(
-            "TODO: {} | Status: {} | Urgency: {}",
-            todo.todo_task_name.blue(),
-            todo.todo_status.to_string().red(),
-            match todo.todo_urgency {
-                TodoUrgency::Passive => todo.todo_urgency.to_string().green(),
-                TodoUrgency::Reminder => todo.todo_urgency.to_string().yellow(),
-                TodoUrgency::Urgent => todo.todo_urgency.to_string().red(),
-            }
-        )
+            "{}",
+            "Congratz you finished all your todos\nPress enter to return to the menu"
+                .bright_green()
+        );
+        get_string_input();
+    } else {
+        println!("{}", "Current Todos:".bright_magenta());
+        println!(
+            "{}",
+            "_____________________________________________________________".bright_magenta()
+        );
+        for todo in todo_list {
+            println!(
+                "TODO: {} | Status: {} | Urgency: {}",
+                todo.todo_task_name.blue(),
+                match todo.todo_status {
+                    TodoStatus::Incomplete => todo.todo_status.to_string().red(),
+                    TodoStatus::Complete => todo.todo_status.to_string().green(),
+                },
+                match todo.todo_urgency {
+                    TodoUrgency::Passive => todo.todo_urgency.to_string().green(),
+                    TodoUrgency::Reminder => todo.todo_urgency.to_string().yellow(),
+                    TodoUrgency::Urgent => todo.todo_urgency.to_string().red(),
+                }
+            )
+        }
+        println!("{}", "Press enter to return to the menu".red());
+        get_string_input();
     }
-    println!("{}", "Press enter to return to the menu".red());
-    get_string_input();
 }
 
 pub fn clear_todos(todo_list: &mut Vec<Todo>) {
     clear_terminal();
-    println!(
-        "{}",
-        "Are you sure you wish to clear all current todos? (Type 'yes' to confirm)".red()
-    );
-    let double_check = get_string_input();
-    match double_check.trim() {
-        "yes" => {
-            todo_list.clear();
-            println!("Todos cleared, returning to menu...");
-            timeout1s()
-        }
-        _ => {
-            println!("{}", "Todos NOT cleared, returning to menu...".red());
-            timeout1s()
+    if todo_list.len() == 0 {
+        println!(
+            "{}",
+            "No todos to clear\nPress enter to return to the menu".bright_green()
+        );
+        get_string_input();
+    } else {
+        println!(
+            "{}",
+            "Are you sure you wish to clear all current todos? (Type 'yes' to confirm)".red()
+        );
+        let double_check = get_string_input();
+        match double_check.trim() {
+            "yes" => {
+                todo_list.clear();
+                println!("Todos cleared, returning to menu...");
+                timeout1s()
+            }
+            _ => {
+                println!("{}", "Todos NOT cleared, returning to menu...".red());
+                timeout1s()
+            }
         }
     }
 }
@@ -192,20 +215,52 @@ pub fn read_todos_from_file(mut todo_list: &mut Vec<Todo>) {
     }
 }
 
-pub fn write_todos_to_file(todo_list: Vec<Todo>) {
-    let mut f = File::create("data/todos.txt").expect("Unable to find/create file");
-    for todo in &todo_list {
-        write!(f, "{} {}\n", todo.todo_task_name, todo.todo_urgency);
+fn get_remaining_todos(todo_list: &mut Vec<Todo>) -> Vec<&mut Todo> {
+    return todo_list
+        .into_iter()
+        .filter(|x| x.todo_status == TodoStatus::Incomplete)
+        .collect();
+}
+
+pub fn write_todos_to_file(todo_list: &mut Vec<Todo>) {
+    clear_terminal();
+    println!(
+        "{}",
+        "Exit and save remaining todos? ('y' for yes, press any other button for no)\n(Any completed todos wont be saved to file)"
+    );
+    let exit_bool = get_string_input();
+    match exit_bool.trim() {
+        // TODO
+        "y" => {
+            let rem_todos = get_remaining_todos(todo_list);
+            let mut f = File::create("data/todos.txt").expect("Unable to find/create file");
+            for todo in &rem_todos {
+                write!(f, "{} {}\n", todo.todo_task_name, todo.todo_urgency);
+            }
+            std::process::exit(1);
+        }
+        _ => {
+            println!("{}", "Returning to menu...".red());
+            timeout1s();
+            ()
+        }
     }
 }
 
-// TODO: Finish
-pub fn view_remaining_todos(todo_list: &mut Vec<Todo>) {
+pub fn complete_remaining_todos(todo_list: &mut Vec<Todo>) {
     clear_terminal();
     let mut index: i32 = 0;
-    println!("{}", "Which todo have you completed?".bright_magenta());
-    for todo in &mut *todo_list {
-        if todo.todo_status == TodoStatus::Incomplete {
+    let mut rem_todos = get_remaining_todos(todo_list);
+
+    if rem_todos.len() == 0 {
+        println!(
+            "{}",
+            "No remaining todos\nPress enter to return to the menu".red()
+        );
+        get_string_input();
+    } else {
+        println!("{}", "Which todo have you completed?".bright_magenta());
+        for todo in &rem_todos {
             index += 1;
             println!(
                 "{} {}",
@@ -213,13 +268,23 @@ pub fn view_remaining_todos(todo_list: &mut Vec<Todo>) {
                 todo.todo_task_name.green()
             );
         }
+        println!(
+            "{}",
+            "____________________________________________".bright_magenta()
+        );
+        println!(
+            "{}",
+            "Please enter the number of the Todo you have completed:".red()
+        );
+        index = 0;
+        let user_input = get_int_input();
+        for mut todo in &mut rem_todos {
+            index += 1;
+            if index == user_input {
+                todo.todo_status = TodoStatus::Complete;
+                println!("Todo status updated, returning to menu...");
+                timeout1s();
+            }
+        }
     }
-    println!(
-        "{}",
-        "____________________________________________".bright_magenta()
-    );
-    println!(
-        "{}",
-        "Please enter the number of the Todo you have completed:".red()
-    );
 }

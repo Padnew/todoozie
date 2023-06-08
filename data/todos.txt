@@ -1,4 +1,2 @@
 Clean room Passive
-Wash dog Urgent
-Clean floors Reminder
-Walk da dawg Reminder
+Wash dog Reminder
