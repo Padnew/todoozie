@@ -50,7 +50,6 @@ impl Todo {
             println!("{}", "Invalid number of arguments, try again...".red());
             timeout1s();
             create_new_todo(todo_list);
-        } else {
         }
         // 'tn is the name of the block expression so it can break out easily
         let task_name = 'tn: {
@@ -97,12 +96,15 @@ impl Todo {
 pub fn create_new_todo(todo_list: &mut Vec<Todo>) {
     clear_terminal();
     println!("{}", "Add new Todo".bright_magenta());
-    println!("_________________________________________________________");
+    println!(
+        "{}",
+        "_____________________________________________________________".bright_magenta()
+    );
     println!(
         "Task and severity (1. {}, 2. {}, 3. {}): ",
         "Urgent".red(),
-        "Passive".green(),
-        "Reminder".yellow()
+        "Passive".yellow(),
+        "Reminder".green()
     );
     Todo::build(get_string_input(), todo_list);
     println!("Todo created, returning to menu...");
@@ -133,9 +135,9 @@ pub fn view_all_todos(todo_list: &Vec<Todo>) {
                     TodoStatus::Complete => todo.todo_status.to_string().green(),
                 },
                 match todo.todo_urgency {
-                    TodoUrgency::Passive => todo.todo_urgency.to_string().green(),
-                    TodoUrgency::Reminder => todo.todo_urgency.to_string().yellow(),
                     TodoUrgency::Urgent => todo.todo_urgency.to_string().red(),
+                    TodoUrgency::Passive => todo.todo_urgency.to_string().yellow(),
+                    TodoUrgency::Reminder => todo.todo_urgency.to_string().green(),
                 }
             )
         }

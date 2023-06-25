@@ -1,2 +1,4 @@
 Clean room Passive
-Wash dog Reminder
+Make lunch Reminder
+Setup Linq statements Passive
+Finish this project Reminder
