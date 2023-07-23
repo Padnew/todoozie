@@ -232,7 +232,6 @@ pub fn write_todos_to_file(todo_list: &mut Vec<Todo>) {
     );
     let exit_bool = get_string_input();
     match exit_bool.trim() {
-        // TODO
         "y" => {
             let rem_todos = get_remaining_todos(todo_list);
             let mut f = File::create("data/todos.txt").expect("Unable to find/create file");
