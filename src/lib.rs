@@ -228,7 +228,7 @@ pub fn write_todos_to_file(todo_list: &mut Vec<Todo>) {
     clear_terminal();
     println!(
         "{}",
-        "Exit and save remaining todos? ('y' for yes, press any other button for no)\n(Any completed todos wont be saved to file)"
+        "Exit and save remaining todos? ('y' for yes, 'n' to exit without saving, anything else to return to menu)\n(Any completed todos wont be saved to file)"
     );
     let exit_bool = get_string_input();
     match exit_bool.trim() {
@@ -241,10 +241,10 @@ pub fn write_todos_to_file(todo_list: &mut Vec<Todo>) {
             }
             std::process::exit(1);
         }
+        "n" => std::process::exit(1),
         _ => {
             println!("{}", "Returning to menu...".red());
             timeout1s();
-            ()
         }
     }
 }
